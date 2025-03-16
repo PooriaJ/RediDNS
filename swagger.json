@@ -1,0 +1,698 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "DNS Server API",
+    "description": "API for managing DNS zones and records",
+    "version": "1.0.0",
+    "contact": {
+      "name": "Pooria"
+    }
+  },
+  "host": "127.0.0.1:8080",
+  "basePath": "/api/v1",
+  "schemes": ["http"],
+  "consumes": ["application/json"],
+  "produces": ["application/json"],
+  "paths": {
+    "/health": {
+      "get": {
+        "summary": "Health check",
+        "description": "Returns the health status of the API",
+        "tags": ["System"],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "schema": {
+              "$ref": "#/definitions/HealthResponse"
+            }
+          }
+        }
+      }
+    },
+    "/stats": {
+      "get": {
+        "summary": "Get DNS server statistics",
+        "description": "Returns statistics about the DNS server",
+        "tags": ["System"],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "schema": {
+              "$ref": "#/definitions/StatsResponse"
+            }
+          }
+        }
+      }
+    },
+    "/zones": {
+      "get": {
+        "summary": "List all zones",
+        "description": "Returns a list of all DNS zones",
+        "tags": ["Zones"],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "schema": {
+              "$ref": "#/definitions/ZonesListResponse"
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create a new zone",
+        "description": "Creates a new DNS zone",
+        "tags": ["Zones"],
+        "parameters": [
+          {
+            "name": "zone",
+            "in": "body",
+            "description": "Zone to create",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ZoneCreateRequest"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Zone created successfully",
+            "schema": {
+              "$ref": "#/definitions/ZoneResponse"
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "409": {
+            "description": "Zone already exists",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/zones/{name}": {
+      "get": {
+        "summary": "Get a specific zone",
+        "description": "Returns details of a specific DNS zone",
+        "tags": ["Zones"],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "description": "Zone name",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "schema": {
+              "$ref": "#/definitions/ZoneResponse"
+            }
+          },
+          "404": {
+            "description": "Zone not found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete a zone",
+        "description": "Deletes a specific DNS zone and all its records",
+        "tags": ["Zones"],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "description": "Zone name",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Zone deleted successfully",
+            "schema": {
+              "$ref": "#/definitions/SuccessResponse"
+            }
+          },
+          "404": {
+            "description": "Zone not found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/zones/{zone}/records": {
+      "get": {
+        "summary": "List all records for a zone",
+        "description": "Returns a list of all DNS records for a specific zone",
+        "tags": ["Records"],
+        "parameters": [
+          {
+            "name": "zone",
+            "in": "path",
+            "description": "Zone name",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "schema": {
+              "$ref": "#/definitions/RecordsListResponse"
+            }
+          },
+          "404": {
+            "description": "Zone not found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create a new record",
+        "description": "Creates a new DNS record in a specific zone",
+        "tags": ["Records"],
+        "parameters": [
+          {
+            "name": "zone",
+            "in": "path",
+            "description": "Zone name",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "record",
+            "in": "body",
+            "description": "Record to create",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/RecordCreateRequest"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Record created successfully",
+            "schema": {
+              "$ref": "#/definitions/RecordResponse"
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Zone not found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/zones/{zone}/records/{id}": {
+      "get": {
+        "summary": "Get a specific record",
+        "description": "Returns details of a specific DNS record",
+        "tags": ["Records"],
+        "parameters": [
+          {
+            "name": "zone",
+            "in": "path",
+            "description": "Zone name",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Record ID",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "schema": {
+              "$ref": "#/definitions/RecordResponse"
+            }
+          },
+          "404": {
+            "description": "Record not found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Update a record",
+        "description": "Updates a specific DNS record",
+        "tags": ["Records"],
+        "parameters": [
+          {
+            "name": "zone",
+            "in": "path",
+            "description": "Zone name",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Record ID",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "name": "record",
+            "in": "body",
+            "description": "Record update data",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/RecordUpdateRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Record updated successfully",
+            "schema": {
+              "$ref": "#/definitions/RecordResponse"
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Record not found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete a record",
+        "description": "Deletes a specific DNS record",
+        "tags": ["Records"],
+        "parameters": [
+          {
+            "name": "zone",
+            "in": "path",
+            "description": "Zone name",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Record ID",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Record deleted successfully",
+            "schema": {
+              "$ref": "#/definitions/SuccessResponse"
+            }
+          },
+          "404": {
+            "description": "Record not found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "Response": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean",
+          "description": "Indicates if the operation was successful"
+        },
+        "data": {
+          "type": "object",
+          "description": "Response data"
+        },
+        "error": {
+          "type": "string",
+          "description": "Error message if success is false"
+        }
+      },
+      "required": ["success"]
+    },
+    "ErrorResponse": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean",
+          "example": false
+        },
+        "error": {
+          "type": "string",
+          "description": "Error message"
+        }
+      },
+      "required": ["success", "error"]
+    },
+    "SuccessResponse": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean",
+          "example": true
+        },
+        "data": {
+          "type": "object",
+          "description": "Response data"
+        }
+      },
+      "required": ["success", "data"]
+    },
+    "HealthResponse": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean",
+          "example": true
+        },
+        "data": {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string",
+              "example": "ok"
+            },
+            "time": {
+              "type": "string",
+              "format": "date-time",
+              "example": "2023-01-01T12:00:00Z"
+            }
+          }
+        }
+      }
+    },
+    "StatsResponse": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean",
+          "example": true
+        },
+        "data": {
+          "type": "object",
+          "properties": {
+            "queries": {
+              "type": "integer",
+              "format": "int64",
+              "description": "Total number of DNS queries processed"
+            },
+            "cacheHits": {
+              "type": "integer",
+              "format": "int64",
+              "description": "Number of cache hits"
+            },
+            "cacheMisses": {
+              "type": "integer",
+              "format": "int64",
+              "description": "Number of cache misses"
+            },
+            "nxDomain": {
+              "type": "integer",
+              "format": "int64",
+              "description": "Number of NXDOMAIN responses"
+            },
+            "serverFailure": {
+              "type": "integer",
+              "format": "int64",
+              "description": "Number of server failures"
+            },
+            "uptime": {
+              "type": "string",
+              "description": "Server uptime"
+            }
+          }
+        }
+      }
+    },
+    "Zone": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "name": {
+          "type": "string",
+          "description": "Zone name (domain)"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["id", "name", "created_at", "updated_at"]
+    },
+    "ZoneCreateRequest": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Zone name (domain)"
+        }
+      },
+      "required": ["name"]
+    },
+    "ZoneResponse": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean",
+          "example": true
+        },
+        "data": {
+          "$ref": "#/definitions/Zone"
+        }
+      }
+    },
+    "ZonesListResponse": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean",
+          "example": true
+        },
+        "data": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Zone"
+          }
+        }
+      }
+    },
+    "Record": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "zone": {
+          "type": "string",
+          "description": "Zone name this record belongs to"
+        },
+        "name": {
+          "type": "string",
+          "description": "Record name (hostname)"
+        },
+        "type": {
+          "type": "string",
+          "description": "Record type",
+          "enum": ["A", "AAAA", "CNAME", "MX", "NS", "PTR", "SOA", "SRV", "TXT", "CAA"]
+        },
+        "content": {
+          "type": "string",
+          "description": "Record content (value)"
+        },
+        "ttl": {
+          "type": "integer",
+          "description": "Time to live in seconds"
+        },
+        "priority": {
+          "type": "integer",
+          "description": "Priority (used for MX and SRV records)"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["id", "zone", "name", "type", "content", "ttl", "created_at", "updated_at"]
+    },
+    "RecordCreateRequest": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Record name (hostname)"
+        },
+        "type": {
+          "type": "string",
+          "description": "Record type",
+          "enum": ["A", "AAAA", "CNAME", "MX", "NS", "PTR", "SOA", "SRV", "TXT", "CAA"]
+        },
+        "content": {
+          "type": "string",
+          "description": "Record content (value)"
+        },
+        "ttl": {
+          "type": "integer",
+          "description": "Time to live in seconds",
+          "default": 120
+        },
+        "priority": {
+          "type": "integer",
+          "description": "Priority (used for MX and SRV records)",
+          "default": 0
+        }
+      },
+      "required": ["name", "type", "content"]
+    },
+    "RecordUpdateRequest": {
+      "type": "object",
+      "properties": {
+        "content": {
+          "type": "string",
+          "description": "Record content (value)"
+        },
+        "ttl": {
+          "type": "integer",
+          "description": "Time to live in seconds"
+        },
+        "priority": {
+          "type": "integer",
+          "description": "Priority (used for MX and SRV records)"
+        }
+      }
+    },
+    "RecordResponse": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean",
+          "example": true
+        },
+        "data": {
+          "$ref": "#/definitions/Record"
+        }
+      }
+    },
+    "RecordsListResponse": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean",
+          "example": true
+        },
+        "data": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Record"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,66 @@
+version: '3.8'
+
+networks:
+  DNSServer:
+    driver: bridge
+
+volumes:
+  redis_data:
+  mariadb_data:
+
+services:
+  dns-server:
+    image: pooriajamili/dns-server:1.0.0
+    container_name: dns-server
+    ports:
+      - "53:53/tcp"
+      - "53:53/udp"
+      - "8080:8080"
+    networks:
+      - DNSServer
+    restart: unless-stopped
+    depends_on:
+      mariadb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      start_period: 5s
+      retries: 3
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    volumes:
+      - redis_data:/data
+    networks:
+      - DNSServer
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  mariadb:
+    image: mariadb:latest
+    container_name: mariadb
+    environment:
+      MYSQL_ROOT_PASSWORD: "123"
+      MYSQL_DATABASE: "dns_server"
+      MYSQL_USER: "pooria"
+      MYSQL_PASSWORD: "123"
+    volumes:
+      - mariadb_data:/var/lib/mysql
+    networks:
+      - DNSServer
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      start_period: 10s
+      interval: 10s
+      timeout: 5s
+      retries: 3
